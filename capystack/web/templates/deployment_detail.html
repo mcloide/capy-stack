@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Deployment {{ deployment.id[:8] }} - CapyStack{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-play-circle"></i> Deployment Details
+                <small class="text-muted">{{ deployment.id[:8] }}</small>
+            </h1>
+            
+            <div>
+                {% if deployment.status in ['queued', 'running'] %}
+                <button class="btn btn-warning" id="cancelBtn">
+                    <i class="bi bi-stop-circle"></i> Cancel
+                </button>
+                {% endif %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Deployment Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong>
+                            {% if deployment.status == 'succeeded' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Succeeded
+                                </span>
+                            {% elif deployment.status == 'failed' %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-x-circle"></i> Failed
+                                </span>
+                            {% elif deployment.status == 'running' %}
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-play-circle"></i> Running
+                                </span>
+                            {% elif deployment.status == 'queued' %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-clock"></i> Queued
+                                </span>
+                            {% elif deployment.status == 'canceled' %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-stop-circle"></i> Canceled
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ deployment.status.title() }}</span>
+                            {% endif %}
+                        </p>
+                        
+                        <p><strong>Reference:</strong>
+                            <span class="badge bg-light text-dark">
+                                {{ deployment.ref_type }}: {{ deployment.ref_name }}
+                            </span>
+                        </p>
+                        
+                        <p><strong>Commit:</strong>
+                            {% if deployment.commit_sha %}
+                                <code>{{ deployment.commit_sha[:8] }}</code>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <p><strong>Started:</strong>
+                            {% if deployment.started_at %}
+                                {{ deployment.started_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </p>
+                        
+                        <p><strong>Finished:</strong>
+                            {% if deployment.finished_at %}
+                                {{ deployment.finished_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </p>
+                        
+                        <p><strong>Duration:</strong>
+                            {% if deployment.runtime_seconds %}
+                                {{ deployment.runtime_seconds }}s
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Deployment Steps</h5>
+            </div>
+            <div class="card-body">
+                {% for step in steps %}
+                <div class="d-flex align-items-center mb-2">
+                    <div class="me-3">
+                        {% if step.status == 'succeeded' %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        {% elif step.status == 'failed' %}
+                            <i class="bi bi-x-circle-fill text-danger"></i>
+                        {% elif step.status == 'running' %}
+                            <i class="bi bi-arrow-clockwise text-primary"></i>
+                        {% elif step.status == 'skipped' %}
+                            <i class="bi bi-skip-forward-circle-fill text-secondary"></i>
+                        {% else %}
+                            <i class="bi bi-clock text-muted"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">{{ step.name.replace('_', ' ').title() }}</div>
+                        {% if step.status == 'running' %}
+                            <div class="small text-muted">Running...</div>
+                        {% elif step.status == 'succeeded' %}
+                            <div class="small text-muted">Completed</div>
+                        {% elif step.status == 'failed' %}
+                            <div class="small text-muted">Failed</div>
+                        {% elif step.status == 'skipped' %}
+                            <div class="small text-muted">Skipped</div>
+                        {% else %}
+                            <div class="small text-muted">Queued</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-terminal"></i> Live Logs
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="logs" class="bg-dark text-light p-3 rounded" style="height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.9em;">
+                    <div class="text-muted">Waiting for logs...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const logsContainer = document.getElementById('logs');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const deploymentId = '{{ deployment.id }}';
+    
+    // Set up Server-Sent Events for live logs
+    const eventSource = new EventSource(`/deployments/${deploymentId}/stream`);
+    
+    eventSource.onmessage = function(event) {
+        try {
+            const data = JSON.parse(event.data);
+            
+            if (data.error) {
+                logsContainer.innerHTML += `<div class="text-danger">Error: ${data.error}</div>`;
+                return;
+            }
+            
+            // Create log line
+            const timestamp = new Date(data.timestamp).toLocaleTimeString();
+            const levelClass = data.level.toLowerCase();
+            const step = data.step ? `[${data.step}]` : '';
+            
+            const logLine = document.createElement('div');
+            logLine.className = `mb-1`;
+            logLine.innerHTML = `
+                <span class="text-muted">${timestamp}</span>
+                <span class="badge bg-${levelClass === 'error' ? 'danger' : levelClass === 'warning' ? 'warning' : 'info'} me-2">${data.level}</span>
+                <span class="text-muted">${step}</span>
+                <span>${data.message}</span>
+            `;
+            
+            logsContainer.appendChild(logLine);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+            
+        } catch (e) {
+            console.error('Error parsing log data:', e);
+        }
+    };
+    
+    eventSource.onerror = function(event) {
+        console.error('SSE error:', event);
+        logsContainer.innerHTML += '<div class="text-danger">Connection to logs lost.</div>';
+    };
+    
+    // Handle cancel button
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to cancel this deployment?')) {
+                fetch(`/api/deployments/${deploymentId}/cancel`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Failed to cancel deployment: ' + data.error);
+                    } else {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to cancel deployment');
+                });
+            }
+        });
+    }
+    
+    // Clean up on page unload
+    window.addEventListener('beforeunload', function() {
+        eventSource.close();
+    });
+});
+</script>
+{% endblock %}

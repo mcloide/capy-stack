@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CapyStack{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-house"></i> Dashboard
+            <small class="text-muted">{{ project.name }}</small>
+        </h1>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-play-circle"></i> New Deployment
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Start a new deployment from a branch, tag, or release.</p>
+                <a href="{{ url_for('new_deployment') }}" class="btn btn-primary">
+                    <i class="bi bi-play-circle"></i> Deploy Now
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> Project Info
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <strong>Repository:</strong> {{ project.repo_url }}<br>
+                    <strong>Provider:</strong> {{ project.git_provider.title() }}<br>
+                    <strong>Default Branch:</strong> {{ project.default_branch }}<br>
+                    <strong>Runner:</strong> {{ project.runner_type.title() }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history"></i> Recent Deployments
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if deployments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Reference</th>
+                                <th>Commit</th>
+                                <th>User</th>
+                                <th>Started</th>
+                                <th>Duration</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for deployment in deployments %}
+                            <tr>
+                                <td>
+                                    {% if deployment.status == 'succeeded' %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> Succeeded
+                                        </span>
+                                    {% elif deployment.status == 'failed' %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle"></i> Failed
+                                        </span>
+                                    {% elif deployment.status == 'running' %}
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-play-circle"></i> Running
+                                        </span>
+                                    {% elif deployment.status == 'queued' %}
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-clock"></i> Queued
+                                        </span>
+                                    {% elif deployment.status == 'canceled' %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-stop-circle"></i> Canceled
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ deployment.status.title() }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">
+                                        {{ deployment.ref_type }}: {{ deployment.ref_name }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if deployment.commit_sha %}
+                                        <code class="small">{{ deployment.commit_sha[:8] }}</code>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if deployment.user %}
+                                        {{ deployment.user.name or deployment.user.email }}
+                                    {% else %}
+                                        <span class="text-muted">System</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if deployment.started_at %}
+                                        {{ deployment.started_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if deployment.runtime_seconds %}
+                                        {{ deployment.runtime_seconds }}s
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('deployment_detail', deployment_id=deployment.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <p class="text-muted mt-3">No deployments yet. Start your first deployment!</p>
+                    <a href="{{ url_for('new_deployment') }}" class="btn btn-primary">
+                        <i class="bi bi-play-circle"></i> Deploy Now
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+# CapyStack Development Requirements
+# This file contains only the essential packages for development
+# Database drivers are installed separately to avoid system dependency issues
+
+Flask>=3.0.0
+SQLAlchemy>=2.0.0
+Alembic>=1.13.0
+redis>=5.0.0
+rq>=1.15.0
+cryptography>=41.0.0
+requests>=2.31.0
+httpx>=0.25.0
+GitPython>=3.1.0
+python-dotenv>=1.0.0
+Werkzeug>=3.0.0
+Jinja2>=3.1.0
+gunicorn>=21.0.0
+rich>=13.0.0
+
+# Database drivers (install separately if needed)
+# psycopg2-binary>=2.9.0  # PostgreSQL
+# PyMySQL>=1.1.0          # MySQL
