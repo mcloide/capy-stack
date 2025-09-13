@@ -101,6 +101,7 @@ The project follows all specifications and is ready for immediate use. All compo
 
 ## 📁 Project Structure
 
+```
 capystack/
 ├── app.py                    # Main Flask application
 ├── run.py                    # Startup script
@@ -147,4 +148,4 @@ capystack/
 │   ├── env.py               # Alembic environment
 │   └── script.py.mako       # Migration template
 └── tests/                   # Test framework (ready)
-
+```
