@@ -1,4 +1,4 @@
-# CapyStack
+# CapiStack
 
 A lightweight Python CI/CD web application for deploying applications from Git repositories via a browser interface.
 
@@ -55,7 +55,7 @@ The application is production-ready with:
 
 ### Option 1: Development Setup (Recommended for local development)
 ```bash
-cd capystack
+cd capistack
 ./setup-dev.sh
 ```
 This script will:
@@ -72,7 +72,7 @@ python setup.py
 
 ### Option 2: Interactive Setup (Docker/Production)
 ```bash
-cd capystack
+cd capistack
 python setup.py
 ```
 The setup script will guide you through creating your `.env` file with:
@@ -83,7 +83,7 @@ The setup script will guide you through creating your `.env` file with:
 
 ### Option 3: Manual Configuration
 ```bash
-cd capystack
+cd capistack
 cp env.example .env
 # Edit .env with your settings
 ```
@@ -102,7 +102,7 @@ The project follows all specifications and is ready for immediate use. All compo
 ## 📁 Project Structure
 
 ```
-capystack/
+capistack/
 ├── app.py                    # Main Flask application
 ├── run.py                    # Startup script
 ├── setup.py                  # Interactive setup CLI
@@ -112,7 +112,7 @@ capystack/
 ├── docker-compose.yml       # Multi-service setup
 ├── alembic.ini              # Database migration config
 ├── env.example              # Environment variables template
-├── capystack.yml.example     # Deployment config template
+├── capistack.yml.example     # Deployment config template
 ├── README.md                # Comprehensive documentation
 ├── auth/                    # Authentication system
 │   ├── __init__.py          # Auth decorators and utilities
@@ -129,7 +129,7 @@ capystack/
 │       ├── css/style.css    # Custom styling
 │       ├── js/app.js        # JavaScript functionality
 │       └── images/          # Images and icons
-│           ├── logo.svg     # CapyStack logo
+│           ├── logo.svg     # CapiStack logo
 │           └── favicon.*    # Favicon files
 ├── api/                     # API endpoints (ready for expansion)
 ├── core/                    # Core functionality

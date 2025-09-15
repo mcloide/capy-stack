@@ -1,0 +1,227 @@
+{# templates/about.html #} {% extends "base.html" %} {% block title %}About
+CapiStack{% endblock %} {% block content %}
+<div class="container py-4 py-md-5">
+  <!-- Header -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <img
+      src="{{ url_for('static', filename='images/logo.svg') }}"
+      alt="CapiStack logo"
+      class="rounded-circle border"
+      width="96"
+      height="96"
+    />
+    <div>
+      <h1 class="h3 mb-1">About CapiStack</h1>
+      <p class="text-body-secondary mb-0">
+        A lightweight, single-app CI/CD service you run yourself.
+      </p>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">TL;DR</div>
+    <div class="card-body">
+      <section class="container py-4">
+        <!-- TL;DR -->
+        <h2 class="h5 mb-2">TL;DR</h2>
+        <p class="mb-3">
+          <strong>CapiStack</strong> is a self-hosted CI/CD platform that keeps
+          things simple, secure, and transparent. It deploys a single app from a
+          Git repo (GitHub, GitLab, or any Git server) to your servers with
+          minimal config. Built with <em>Python + Flask + SQLAlchemy + RQ</em>,
+          using a straightforward pipeline:
+          <code>checkout → build → deploy → post-deploy</code>.
+        </p>
+
+        <!-- Plain-speak -->
+        <p class="clearfix mb-3">
+          <img
+            src="{{ url_for('static', filename='images/anime.png') }}"
+            alt="She is too cute to say no."
+            width="76"
+            height="76"
+            class="float-start me-3 mb-2"
+          />
+          In plain terms, it’s an over-glorified <code>git pull</code> with a
+          web UI, auth, and logs. And yes, the mascot is a cute capybara my
+          youngest picked—she was too cute to say no. 🫶
+        </p>
+
+        <!-- Why this exists -->
+        <h3 class="h6 mt-4 mb-2">Why another tool?</h3>
+        <p class="mb-3">
+          Because using Jenkins to ship a tiny service is overkill. Most other
+          tools felt too complex, too heavy, or too opaque. I wanted a “pick a
+          branch → deploy → see logs” workflow. Also, I was a little bored.
+        </p>
+
+        <!-- Not (yet) -->
+        <h3 class="h6 mt-4 mb-2">What it doesn’t do (yet)</h3>
+        <ul class="mb-3">
+          <li>
+            Multi-repo or multi-app orchestration (it’s single-app on purpose
+            for now).
+          </li>
+          <li>Server-to-server “promote from host A to host B” pipeline.</li>
+        </ul>
+        <p class="mb-0">
+          It’s open-source and evolving. If it helps you as much as it helps me,
+          awesome. Run the setup, kick the tires, and if you hit a bug or have
+          an idea, please open an issue or PR.
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <!-- What it does -->
+  <div class="card mb-4">
+    <div class="card-header">What it does</div>
+    <div class="card-body">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          Single-app deploys from a browser (GitHub/GitLab or generic Git).
+        </li>
+        <li class="list-group-item">Select ref: branch, tag, or release.</li>
+        <li class="list-group-item">
+          Live progress via SSE; background jobs with RQ/Redis.
+        </li>
+        <li class="list-group-item">
+          History: keeps the last <strong>10 deployments</strong> with status,
+          user, ref, timestamps.
+        </li>
+        <li class="list-group-item">
+          Secrets: <code>.env</code> for config + encrypted secrets at rest
+          (Fernet).
+        </li>
+        <li class="list-group-item">
+          Auth modes (<code>.env</code>): <code>none</code> ·
+          <code>basic</code> · <code>oauth</code> (GitHub/GitLab/OIDC).
+        </li>
+        <li class="list-group-item">
+          Database: Postgres or MySQL (SQLAlchemy + Alembic).
+        </li>
+        <li class="list-group-item">
+          Runner: <code>local</code> by default; optional Docker isolation.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="card mb-4">
+    <div class="card-header">How it works (pipeline)</div>
+    <div class="card-body">
+      <ol class="list-group list-group-numbered list-group-flush">
+        <li class="list-group-item">
+          <strong>Preflight</strong> — validate repo, env, secrets.
+        </li>
+        <li class="list-group-item">
+          <strong>Checkout</strong> — shallow clone and resolve commit SHA.
+        </li>
+        <li class="list-group-item">
+          <strong>Env inject</strong> — merge project secrets into runtime env.
+        </li>
+        <li class="list-group-item">
+          <strong>Build (optional)</strong> — run commands from
+          <code>capistack.yml</code> (or skip).
+        </li>
+        <li class="list-group-item">
+          <strong>Deploy</strong> — run <code>deploy</code> steps or
+          <code>./deploy.sh</code>.
+        </li>
+        <li class="list-group-item">
+          <strong>Post-deploy (optional)</strong> — webhooks, cache clears, etc.
+        </li>
+        <li class="list-group-item">
+          <strong>Finalize</strong> — persist logs/artifacts, enforce retention.
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Why -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-lg-6">
+      <div class="card h-100">
+        <div class="card-header">Why CapiStack</div>
+        <div class="card-body">
+          <ul class="mb-0">
+            <li>
+              <strong>Focused</strong>: optimized for one service—fewer knobs.
+            </li>
+            <li>
+              <strong>Portable</strong>: Python, Flask, Redis, SQL; run
+              anywhere.
+            </li>
+            <li>
+              <strong>Transparent</strong>: structured, streamable logs &
+              explicit steps.
+            </li>
+            <li>
+              <strong>Safe by default</strong>: secrets encryption, minimal
+              token scopes, clear auth.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tech snapshot -->
+    <div class="col-12 col-lg-6">
+      <div class="card h-100">
+        <div class="card-header">Tech snapshot</div>
+        <div class="card-body">
+          <ul class="mb-0">
+            <li>
+              <strong>Backend</strong>: Python 3.11+, Flask 3.x, SQLAlchemy 2.x,
+              Alembic
+            </li>
+            <li>
+              <strong>Jobs/Logs</strong>: RQ + Redis, SSE/WebSocket for
+              streaming
+            </li>
+            <li>
+              <strong>Git</strong>: provider APIs or
+              <code>git ls-remote</code> fallback
+            </li>
+            <li><strong>UI</strong>: Jinja templates + minimal JS/HTMX</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick start -->
+  <div class="card mb-4">
+    <div class="card-header">Quick start</div>
+    <div class="card-body">
+      <pre
+        class="bg-body-tertiary p-3 rounded border mb-0"
+      ><code>python3 -m venv .venv && source .venv/bin/activate
+python -m pip install -U pip
+python -m pip install -r requirements.txt
+cp env.example .env   # fill in DB, REDIS_URL, AUTH_MODE, FERNET_KEY, etc.
+alembic upgrade head
+python -m flask --app app run --debug</code></pre>
+    </div>
+  </div>
+
+  <!-- Roadmap -->
+  <div class="card mb-4">
+    <div class="card-header">Roadmap</div>
+    <div class="card-body">
+      <ul class="mb-0">
+        <li>Multi-project support &amp; RBAC</li>
+        <li>Webhooks (auto-deploy on tag push)</li>
+        <li>Rollbacks &amp; artifact storage (S3/MinIO)</li>
+        <li>Canary/health checks &amp; metrics</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="text-body-secondary small mb-0">
+    Powered by a cuddly capybara with a box and an ↑ arrow. One gentle push to
+    prod.
+  </p>
+</div>
+{% endblock %}
